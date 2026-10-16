@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f6f2">
+  <title>听笺 · Local</title>
+  <link rel="stylesheet" href="/style.css">
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <a class="brand" href="/" aria-label="听笺首页"><span class="brand-mark">听</span><span>听笺<small>LOCAL STUDIO</small></span></a>
+    <button id="new-session" class="button primary new-button"><span>＋</span> 新建录音</button>
+    <div class="library-heading"><span>我的录音</span><span id="library-count">0</span></div>
+    <label class="search-wrap"><span>⌕</span><input id="search" placeholder="搜索标题、课程…" aria-label="搜索录音"></label>
+    <div id="library" class="library"></div>
+    <div class="sidebar-bottom">
+      <button id="settings-button" class="settings-button">⚙ <span>本地模型设置</span><span id="model-dot" class="status-dot"></span></button>
+      <div class="privacy-note"><span class="tiny-shield">◇</span> 本地保存 · 实时模式音频送往千问</div>
+    </div>
+  </aside>
+  <main>
+    <header class="topbar"><span class="breadcrumb">工作空间 <span>/</span> <b id="breadcrumb-title">我的录音</b></span><span class="local-badge"><i></i> 本地处理</span></header>
+    <section class="workspace">
+      <div class="page-heading"><div><p class="eyebrow">YOUR WORDS, WELL KEPT.</p><h1 id="session-title">把听见的，留下来。</h1><p id="session-meta" class="muted">专注当下，整理留给本地 AI。</p></div><div id="session-actions" class="heading-actions hidden"><button id="rename" class="button subtle">编辑标题</button><button id="delete" class="button subtle danger">删除</button></div></div>
+      <div id="model-notice" class="notice hidden"></div>
+      <div class="mode-row"><label>字幕模式 <select id="record-mode" aria-label="字幕模式"><option value="qwen">千问 · 实时双语字幕</option><option value="local">本地 · 离线转写翻译</option></select></label><span id="cloud-state" role="status">正在检查配置…</span><button id="configure-cloud" class="text-button">配置千问 API</button></div>
+      <section id="recording-card" class="recording-card">
+        <div class="recording-intro"><div class="mic-icon">◉</div><div><strong id="recording-title">一段值得留住的声音</strong><p id="recording-description">录下课堂、会议与想法，或导入已有音频。</p></div></div>
+        <div class="record-controls"><span id="record-clock" class="record-clock hidden">00:00</span><meter id="level" min="0" max="1" value="0" class="hidden" aria-label="麦克风音量"></meter><button id="record-button" class="button primary"><span class="record-dot"></span><span id="record-button-text">开始录音</span></button><button id="import-button" class="button secondary">↑ 导入音频</button><input id="audio-file" type="file" accept="audio/*,video/mp4,.m4a,.flac,.aiff" hidden></div>
+        <div class="recording-foot"><span>英语 → 中文</span><span id="mode-description">音频发送至千问 · 双语字幕持续更新 · 笔记在本机处理</span><button id="backup" class="text-button hidden">保存录音备份</button></div>
+      </section>
+      <div id="jobs" class="jobs" aria-live="polite"></div>
+      <div class="content-grid">
+        <section class="transcript-panel panel">
+          <div class="panel-heading"><div class="tabs"><button class="tab active" data-tab="transcript">双语转写 <span id="segment-count">0</span></button><button class="tab" data-tab="notes">AI 笔记</button></div><div class="export-control"><select id="export-format" aria-label="导出格式"><option value="md">Markdown</option><option value="srt">双语 SRT</option><option value="json">JSON</option></select><button id="export" class="text-button" disabled>↓ 导出</button></div></div>
+          <div id="transcript" class="transcript-body"><div class="empty-state"><div class="empty-art"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div><h2>每一句，都有迹可循</h2><p>开始录音或导入音频后，<br>这里会逐段呈现原文与译文。</p><div class="format-tags"><span>带时间戳</span><span>点击回听</span><span>双语对照</span></div></div></div>
+          <div id="notes" class="notes-body hidden"><div class="empty-state"><h2>让知识变得有条理</h2><p>完成转写后，生成带时间线索的课程笔记。</p><button id="summary-in-notes" class="button secondary">生成 AI 笔记</button></div></div>
+          <div class="player-wrap hidden" id="player-wrap"><span id="player-label">原始录音</span><audio id="player" controls preload="none"></audio></div>
+        </section>
+        <aside class="inspector">
+          <section class="panel tools-panel"><div class="section-kicker">让录音多走一步</div><h2>听完之后，也想得更清楚。</h2><p>使用本地模型，理解这段录音。</p><button id="translate" class="tool-button"><span class="tool-icon">文</span><span><strong>生成双语译文</strong><small>补齐尚未翻译的段落</small></span><span>↗</span></button><button id="summarize" class="tool-button"><span class="tool-icon">≡</span><span><strong>整理课程笔记</strong><small>概念、重点与需要回听的内容</small></span><span>↗</span></button></section>
+          <section class="panel chat-panel"><div class="chat-heading"><span>✧</span><h2>问问这段录音</h2></div><p class="muted">从录音里找答案，带上时间线索。</p><div id="messages" class="messages"><div class="chat-placeholder">“刚才讲的核心观点是什么？”<br>“有哪些概念需要重点复习？”</div></div><form id="question-form"><textarea id="question" rows="2" maxlength="1500" placeholder="输入关于录音的问题…" aria-label="关于录音的问题"></textarea><div class="chat-input-footer"><span>仅依据这段录音回答</span><button id="ask" type="submit" aria-label="发送问题">↑</button></div></form></section>
+          <div class="model-label"><i class="status-dot"></i><span id="active-model">正在检查本地模型…</span></div>
+        </aside>
+      </div>
+      <footer class="workspace-footer"><span>听笺 · 为专注留一点空间</span><span>PRIVATE BY DESIGN</span></footer>
+    </section>
+  </main>
+  <dialog id="new-dialog"><form id="create-form" class="dialog-form"><div class="dialog-heading"><h2>新建一段录音</h2><button type="button" class="close-dialog" aria-label="关闭">×</button></div><label>标题<input name="title" placeholder="例如：机器学习 · 第三讲" maxlength="150" required></label><label>课程 / 文件夹<input name="folder" placeholder="可选，例如：机器学习" maxlength="80"></label><div class="form-row"><label>录音语言<select name="language"><option value="en">英语</option><option value="zh">中文</option><option value="auto">自动识别</option><option value="ja">日语</option></select></label><label>译文语言<select name="target_language"><option value="zh">简体中文</option><option value="en">English</option><option value="ja">日本語</option></select></label></div><label>专业术语提示<textarea name="glossary" placeholder="例如：gradient descent, backpropagation" maxlength="2500" rows="2"></textarea></label><button class="button primary" type="submit">创建录音</button></form></dialog>
+  <dialog id="settings-dialog">
+    <form id="cloud-settings-form" class="dialog-form">
+      <div class="dialog-heading"><h2>千问实时字幕</h2><button type="button" class="close-dialog" aria-label="关闭">×</button></div>
+      <p class="muted">实时录音会把音频发送至阿里云百炼，按用量计费。仅生成双语字幕，笔记与问答仍用本地模型。导入文件仍在本机处理。</p>
+      <label>服务地域<select id="cloud-region" name="region"><option value="cn-beijing">北京 · 中国内地</option><option value="ap-southeast-1">新加坡 · 国际</option></select></label>
+      <label>百炼业务空间 ID<input id="cloud-workspace" name="workspace_id" maxlength="100" pattern="[A-Za-z0-9-]+" placeholder="与 API Key 属于同一地域和业务空间"></label>
+      <p id="cloud-key-status" class="field-hint"></p>
+      <p class="field-hint">开通与环境变量配置步骤见项目中的“实时API配置.md”。术语固定译法可在新建录音时按每行“原词=译词”填写。源语言自动识别。</p>
+      <button class="button primary" type="submit">保存千问配置</button>
+    </form>
+    <form id="settings-form" class="dialog-form local-model-form">
+      <div class="dialog-heading"><h2>本地模型</h2></div><p class="muted">离线录音、导入文件、笔记和问答使用本地模型。</p><label>语音转写模型 · MLX Whisper<input id="speech-model" name="speech_model" placeholder="模型文件夹的完整路径"></label><p class="field-hint" id="speech-status"></p><label>翻译、笔记与问答模型<input id="text-model" name="text_model" placeholder=".litertlm 文件或 MLX 模型文件夹的完整路径"></label><p class="field-hint">可复用 Foresight 下载的 Gemma .litertlm 文件，原文件保持在原位置。</p><button class="button secondary" type="submit">保存本地模型设置</button>
+    </form>
+  </dialog>
+  <dialog id="rename-dialog"><form id="rename-form" class="dialog-form"><div class="dialog-heading"><h2>整理录音</h2><button type="button" class="close-dialog" aria-label="关闭">×</button></div><label>标题<input name="title" required maxlength="150"></label><label>课程 / 文件夹<input name="folder" maxlength="80"></label><button class="button primary" type="submit">保存</button></form></dialog>
+  <div id="toast" class="toast hidden" role="status"></div>
+</body>
+</html>
